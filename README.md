@@ -677,7 +677,6 @@ sudo dnf install nasm gcc-c++ make grub2-tools xorriso mtools qemu-system-x86
 
 ```bash
 make              # compile everything → nodos.iso
-make disk         # create nodos_disk.img (2 GB)
 make run          # build + launch QEMU with disk attached
 make clean        # remove build/, isodir/, nodos.iso  (disk image is kept)
 ```

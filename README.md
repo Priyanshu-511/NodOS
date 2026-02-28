@@ -86,10 +86,7 @@ sudo apt install nasm g++-multilib grub-pc-bin grub-common xorriso mtools qemu-s
 # 2. Build the ISO
 make
 
-# 3. Create a 2 GB persistent disk image (once)
-make disk
-
-# 4. Run
+# 3. Create a 2 GB persistent disk image (once) and then Run
 make run
 ```
 

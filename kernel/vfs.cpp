@@ -293,23 +293,57 @@ int vfs_chdir(const char* path) {
 
 
 //  Move / copy 
+//  Move / copy 
 int vfs_mv(const char* src, const char* dst) {
     char asrc[VFS_MAX_PATH], adst[VFS_MAX_PATH];
     vfs_resolve(src, asrc, VFS_MAX_PATH);
     vfs_resolve(dst, adst, VFS_MAX_PATH);
+
+    // Strip trailing slashes to normalize paths
+    int slen = k_strlen(asrc);
+    while (slen > 1 && asrc[slen - 1] == '/') { asrc[slen - 1] = '\0'; slen--; }
+    int dlen = k_strlen(adst);
+    while (dlen > 1 && adst[dlen - 1] == '/') { adst[dlen - 1] = '\0'; dlen--; }
+
     if (k_strcmp(asrc, adst) == 0) return 0;
-    if (find_abs(adst) >= 0) return -1;
+
+    int src_idx = find_abs(asrc);
+    if (src_idx < 0) return -1; // Source not found
+
+    // Explicitly check if destination is root, OR an existing directory
+    bool dst_is_dir = (k_strcmp(adst, "/") == 0);
+    int dst_idx = find_abs(adst);
+    if (dst_idx >= 0 && entries[dst_idx].type == VFS_DIR) {
+        dst_is_dir = true;
+    }
+
+    if (dst_is_dir) {
+        // Destination is a directory, move inside it
+        const char* base = asrc;
+        for (int i = slen - 1; i >= 0; i--) {
+            if (asrc[i] == '/') { base = asrc + i + 1; break; }
+        }
+        // Only append a slash if we aren't already at root
+        if (k_strcmp(adst, "/") != 0) {
+            k_strcat(adst, "/");
+        }
+        k_strcat(adst, base);
+        if (find_abs(adst) >= 0) return -1; // Target already exists inside dir
+    } else if (dst_idx >= 0) {
+        return -1; // Cannot overwrite existing file
+    }
+
     int sl = k_strlen(asrc);
     for (int i = 0; i < VFS_MAX_ENTRIES; i++) {
         if (!entries[i].used) continue;
         const char* p = entries[i].path;
         if (k_strcmp(p, asrc) == 0) {
-            k_strncpy(entries[i].path, adst, VFS_MAX_PATH-1);
+            k_strncpy(entries[i].path, adst, VFS_MAX_PATH - 1);
         } else if (k_strncmp(p, asrc, sl) == 0 && p[sl] == '/') {
             char np[VFS_MAX_PATH];
-            k_strncpy(np, adst, VFS_MAX_PATH-1);
+            k_strncpy(np, adst, VFS_MAX_PATH - 1);
             k_strcat(np, p + sl);
-            k_strncpy(entries[i].path, np, VFS_MAX_PATH-1);
+            k_strncpy(entries[i].path, np, VFS_MAX_PATH - 1);
         }
     }
     save_mft();
@@ -320,9 +354,44 @@ int vfs_cp(const char* src, const char* dst) {
     char asrc[VFS_MAX_PATH], adst[VFS_MAX_PATH];
     vfs_resolve(src, asrc, VFS_MAX_PATH);
     vfs_resolve(dst, adst, VFS_MAX_PATH);
-    if (find_abs(adst) >= 0) return -1;
+
+    // Strip trailing slashes to normalize paths
+    int slen = k_strlen(asrc);
+    while (slen > 1 && asrc[slen - 1] == '/') { asrc[slen - 1] = '\0'; slen--; }
+    int dlen = k_strlen(adst);
+    while (dlen > 1 && adst[dlen - 1] == '/') { adst[dlen - 1] = '\0'; dlen--; }
+
+    if (k_strcmp(asrc, adst) == 0) return -1;
+
+    int src_idx = find_abs(asrc);
+    if (src_idx < 0) return -1; // Source not found
+
+    // Explicitly check if destination is root, OR an existing directory
+    bool dst_is_dir = (k_strcmp(adst, "/") == 0);
+    int dst_idx = find_abs(adst);
+    if (dst_idx >= 0 && entries[dst_idx].type == VFS_DIR) {
+        dst_is_dir = true;
+    }
+
+    if (dst_is_dir) {
+        // Destination is a directory, copy inside it
+        const char* base = asrc;
+        for (int i = slen - 1; i >= 0; i--) {
+            if (asrc[i] == '/') { base = asrc + i + 1; break; }
+        }
+        // Only append a slash if we aren't already at root
+        if (k_strcmp(adst, "/") != 0) {
+            k_strcat(adst, "/");
+        }
+        k_strcat(adst, base);
+        if (find_abs(adst) >= 0) return -1; // Target already exists inside dir
+    } else if (dst_idx >= 0) {
+        return -1; // Cannot overwrite existing file
+    }
+
     int sl = k_strlen(asrc);
-    int to_copy[VFS_MAX_ENTRIES]; int nc = 0;
+    int to_copy[VFS_MAX_ENTRIES]; 
+    int nc = 0;
     
     for (int i = 0; i < VFS_MAX_ENTRIES; i++) {
         if (!entries[i].used) continue;
@@ -339,9 +408,11 @@ int vfs_cp(const char* src, const char* dst) {
         entries[s] = entries[i];
         
         char np[VFS_MAX_PATH];
-        k_strncpy(np, adst, VFS_MAX_PATH-1);
-        if (k_strcmp(entries[i].path, asrc) != 0) k_strcat(np, entries[i].path + sl);
-        k_strncpy(entries[s].path, np, VFS_MAX_PATH-1);
+        k_strncpy(np, adst, VFS_MAX_PATH - 1);
+        if (k_strcmp(entries[i].path, asrc) != 0) {
+            k_strcat(np, entries[i].path + sl);
+        }
+        k_strncpy(entries[s].path, np, VFS_MAX_PATH - 1);
         
         // Physically duplicate file data on disk
         if (entries[s].type == VFS_FILE && entries[s].size > 0) {

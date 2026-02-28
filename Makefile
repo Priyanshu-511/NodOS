@@ -72,4 +72,4 @@ run: $(ISO) disk.img
 	  -display gtk,grab-on-hover=off,zoom-to-fit=on     
 
 clean:
-	rm -rf $(BUILD_DIR) $(ISO_DIR) $(ISO)
+	rm -rf $(BUILD_DIR) $(ISO_DIR) $(ISO) 

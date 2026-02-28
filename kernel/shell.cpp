@@ -377,19 +377,59 @@ void shell_init() {
 
     // Preload a sample readme and hello script
     const char* readme =
-        "Welcome to NodOS!\n"
-        "Commands: help, info, mem, ls, cd, md, rd, mv, cp, cat, write, rm, nodev\n"
-        "NodeV scripts: write hello.nod then run: nodev hello.nod\n";
+        "========== NodOS Command Examples ==========\n\n"
+        "--- System ---\n"
+        "  help         -> Shows the short list of commands\n"
+        "  info         -> Shows OS version and details\n"
+        "  mem          -> Shows RAM usage\n\n"
+        "--- Navigation ---\n"
+        "  ls           -> Lists files in current folder\n"
+        "  ls /home     -> Lists files in the /home folder\n"
+        "  cd /home     -> Enters the /home folder\n"
+        "  cd ..        -> Goes up one folder\n"
+        "  md docs      -> Creates a new folder named 'docs'\n"
+        "  rd docs      -> Deletes the 'docs' folder\n\n"
+        "--- File Operations ---\n"
+        "  write f.txt Hello  -> Creates f.txt containing 'Hello'\n"
+        "  cat f.txt          -> Prints the contents of f.txt\n"
+        "  vi script.nod      -> Opens the text editor\n"
+        "  rm f.txt           -> Deletes f.txt\n"
+        "  cp a.txt b.txt     -> Duplicates a.txt as b.txt\n"
+        "  cp a.txt /home     -> Copies a.txt into /home\n"
+        "  mv a.txt b.txt     -> Renames a.txt to b.txt\n"
+        "  mv b.txt /home     -> Moves b.txt into /home\n\n"
+        "--- Scripting ---\n"
+        "  nodev hello.nod    -> Runs the NodeV script\n";
     vfs_write("/readme.txt", readme, k_strlen(readme));
 
     const char* script =
-        "pout(\"Hello from NodeV!\\n\");\n"
-        "int x = 5;\n"
-        "while (x > 0) {\n"
-        "    pout(x, \" \");\n"
-        "    x = x - 1;\n"
+        "pout(\"--- NodeV Syntax Demo ---\\n\");\n\n"
+        "// 1. Variables\n"
+        "int x = 10;\n"
+        "string name = \"NodOS\";\n"
+        "float pi = 3.14;\n"
+        "pout(\"Hello \", name, \"! x=\", x, \"\\n\");\n\n"
+        "// 2. Lists (Arrays up to 64 items)\n"
+        "list arr;\n"
+        "arr[0] = 100;\n"
+        "arr[1] = 200;\n\n"
+        "// 3. Functions\n"
+        "function add(a, b) {\n"
+        "    return a + b;\n"
         "}\n"
-        "pout(\"\\nDone.\\n\");\n";
+        "int sum = add(arr[0], arr[1]);\n"
+        "pout(\"Sum of array = \", sum, \"\\n\");\n\n"
+        "// 4. Loops & Conditionals\n"
+        "pout(\"Counting: \");\n"
+        "for (int i = 0, i < 3, i = i + 1) {\n"
+        "    if (i == 2) { pout(i, \"\\n\"); }\n"
+        "    else { pout(i, \", \"); }\n"
+        "}\n\n"
+        "// 5. User Input\n"
+        "pout(\"Enter your name: \");\n"
+        "string user;\n"
+        "pin(user);\n"
+        "pout(\"Nice to meet you, \", user, \"!\\n\");\n";
     vfs_write("/hello.nod", script, k_strlen(script));
 }
 

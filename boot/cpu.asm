@@ -2,9 +2,9 @@
 bits 32
 section .text
 
-; ───────────────────────────────────────────────────────────
+
 ;  GDT flush — reload all segment registers
-; ───────────────────────────────────────────────────────────
+
 global gdt_flush
 gdt_flush:
     mov eax, [esp+4]
@@ -19,19 +19,19 @@ gdt_flush:
 .done:
     ret
 
-; ───────────────────────────────────────────────────────────
+
 ;  IDT load
-; ───────────────────────────────────────────────────────────
+
 global idt_load
 idt_load:
     mov eax, [esp+4]
     lidt [eax]
     ret
 
-; ───────────────────────────────────────────────────────────
+
 ;  ISR stubs (exceptions 0-31)
 ;  Some push a real error code; others push a dummy 0 first.
-; ───────────────────────────────────────────────────────────
+
 extern isr_handler
 
 %macro ISR_NO_ERR 1
@@ -103,11 +103,11 @@ isr_common:
     add esp, 8              ; remove int_no + err_code
     iret
 
-; ───────────────────────────────────────────────────────────
+
 ;  IRQ stubs (IRQ 0-15 → INT 32-47)
 ;  irq_handler returns a uint32_t: the ESP to use after the
 ;  interrupt.  This allows the scheduler to switch stacks.
-; ───────────────────────────────────────────────────────────
+
 extern irq_handler
 
 %macro IRQ 2

@@ -23,6 +23,7 @@ OBJS = \
     $(BUILD_DIR)/process.o   \
     $(BUILD_DIR)/nodev.o     \
     $(BUILD_DIR)/vi.o        \
+	$(BUILD_DIR)/pager.o     \
     $(BUILD_DIR)/power.o     \
     $(BUILD_DIR)/shell.o     \
     $(BUILD_DIR)/kernel.o

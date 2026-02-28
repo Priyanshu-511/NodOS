@@ -10,7 +10,7 @@
 #include "../include/nodev.h"
 #include "../include/power.h"
 #include "../include/vi.h"
-
+#include "../include/pager.h"
 
 //  Colour helpers 
 static void setc(VGAColor c) { vga.setColor(c, BLACK); }
@@ -69,6 +69,7 @@ static void cmd_help() {
     setc(LIGHT_CYAN); vga.println("--- Scripting ---"); rc();
     vga.println("  nodev <file>         Run a NodeV (.nod) script");
     vga.println("  vi <file>            Open file in vi editor");
+    
 }
 
 static void cmd_clear() { vga.init(); }
@@ -371,7 +372,7 @@ void shell_exec(const char* line) {
 
 //  Init & main loop 
 void shell_init() {
-    // Pre-create /home directory
+    // Pre-create
     vfs_mkdir("/home");
 
     // Preload a sample readme and hello script
@@ -399,6 +400,8 @@ void shell_run() {
         print_prompt();
         keyboard_readline(line, sizeof(line));
         rc();
+        pager_enable();
         shell_exec(line);
+        pager_disable();
     }
 }

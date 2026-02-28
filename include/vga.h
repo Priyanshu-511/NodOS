@@ -1,4 +1,5 @@
 #pragma once
+#include "pager.h"
 #include <stdint.h>
 #include <stddef.h>
 
@@ -34,7 +35,7 @@ public:
     }
 
     void putChar(char c) {
-        if (c == '\n') { newline(); return; }
+        if (c == '\n') { newline(); pager_check(); return; }
         if (c == '\r') { col = 0; return; }
         if (c == '\b') {
             if (col > 0) { col--; buffer[row * WIDTH + col] = makeEntry(' ', color); }

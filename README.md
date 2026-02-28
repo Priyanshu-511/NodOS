@@ -191,7 +191,7 @@ nodos@kernel:/home$
 
 | Command | Description |
 |---------|-------------|
-| `nodev <file>` | Execute a NodeV `.nv` script from the filesystem |
+| `nodev <file>` | Execute a NodeV `.nod` script from the filesystem |
 
 ### Power
 
@@ -210,14 +210,14 @@ NodeV is a complete interpreted language running entirely inside the kernel — 
 ### Your first script
 
 ```bash
-write /hello.nv pout("Hello, NodOS!\n");
-nodev /hello.nv
+write /hello.nod pout("Hello, NodOS!\n");
+nodev /hello.nod
 ```
 
 Or write multi-line scripts with `vi`:
 
 ```bash
-vi /myscript.nv
+vi /myscript.nod
 ```
 
 ### Types
@@ -600,7 +600,7 @@ BIOS / UEFI
                 10.  process_init()          PID 1 = shell, zero procs[] table
                 11.  ata_init()              print ATA status to VGA
                 12.  vfs_init()              read MFT from LBA 1-127, rebuild bitmap
-                13.  shell_init()            seed /home dir, /readme.txt, /hello.nv
+                13.  shell_init()            seed /home dir, /readme.txt, /hello.nod
                 14.  shell_run()             ← never returns
 ```
 

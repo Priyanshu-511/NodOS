@@ -5,8 +5,8 @@
 static VFSEntry entries[VFS_MAX_ENTRIES];
 static char     vfs_cwd[VFS_MAX_PATH] = "/";
 
-// --- PERSISTENT STORAGE VARIABLES & HELPERS ---
-#define MAX_SECTORS 4194304 // 2GB disk = 4M sectors
+//  PERSISTENT STORAGE VARIABLES & HELPERS 
+#define MAX_SECTORS 8388608 // 4GB = 8M sectors
 static uint32_t disk_bitmap[MAX_SECTORS / 32];
 
 static void b_set(uint32_t lba) { disk_bitmap[lba / 32] |= (1u << (lba % 32)); }
@@ -190,7 +190,7 @@ int vfs_append(const char* path, const char* data, uint32_t len) {
     if (idx < 0) { idx = vfs_create(abs); if (idx < 0) return -1; }
     
     // Simple block append for safety: read old file, append data, rewrite
-    static char temp_buf[8192]; // Max append size limits to 8KB 
+    static char temp_buf[65536]; // Max append size limits to 64KB 
     uint32_t current_size = entries[idx].size;
     
     if (current_size + len > sizeof(temp_buf)) return -1; 
@@ -458,8 +458,9 @@ uint32_t vfs_get_disk_size_mb() {
 
 uint32_t vfs_get_used_sectors() {
     uint32_t used = 0;
-    for (uint32_t i = 0; i < MAX_SECTORS; i++) {
-        if (b_tst(i)) used++;
+    for (uint32_t i = 0; i < MAX_SECTORS / 32; i++) {
+        uint32_t w = disk_bitmap[i];
+        while (w) { w &= w - 1; used++; }
     }
     return used;
 }

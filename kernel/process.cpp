@@ -5,6 +5,7 @@
 
 static Process procs[MAX_PROCESSES];
 int current_pid = 0;
+static int next_pid = 2;
 
 // Build the initial kernel-thread stack frame that irq_common expects:
 // ds, edi, esi, ebp, esp_dummy, ebx, edx, ecx, eax,
@@ -46,7 +47,7 @@ void process_init() {
 int process_create(const char* name, void (*entry)()) {
     for (int i = 1; i < MAX_PROCESSES; i++) {
         if (procs[i].state == PROC_UNUSED) {
-            procs[i].pid   = i + 1;
+            procs[i].pid   = next_pid++;  // <-- CHANGE THIS
             procs[i].state = PROC_READY;
             k_strncpy(procs[i].name, name, 31);
             procs[i].stack = (uint8_t*)kmalloc(PROCESS_STACK);
@@ -98,6 +99,23 @@ void process_list(Process** out, int* count) {
     for (int i = 0; i < MAX_PROCESSES; i++)
         if (procs[i].state != PROC_UNUSED && procs[i].state != PROC_DEAD)
             out[(*count)++] = &procs[i];
+}
+
+int process_record_dummy(const char* name) {
+    // We removed the 'extern' line because procs is already accessible in this file.
+    
+    for (int i = 1; i < MAX_PROCESSES; i++) {
+        if (procs[i].state == PROC_UNUSED) {
+            procs[i].pid   = next_pid++; // <-- CHANGE THIS
+            procs[i].state = PROC_SLEEPING;
+            procs[i].sleep_until = 0xFFFFFFFF; // Sleep forever
+            k_strncpy(procs[i].name, name, 31);
+            procs[i].name[31] = '\0';
+            procs[i].stack = nullptr; // No stack means nothing to execute
+            return procs[i].pid;
+        }
+    }
+    return -1; // Process table full
 }
 
 // Called from idt.cpp irq_handler on every timer tick.

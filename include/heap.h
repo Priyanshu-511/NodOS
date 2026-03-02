@@ -2,10 +2,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
-void  heap_init(uint32_t start, uint32_t size);
-void* kmalloc(size_t size);
-void  kfree(void* ptr);
-void* krealloc(void* ptr, size_t new_size);
+// Kernel heap allocator API
 
-uint32_t heap_used();
-uint32_t heap_total();
+void  heap_init(uint32_t start, uint32_t size); // init heap region
+void* kmalloc(size_t size);                     // allocate memory
+void  kfree(void* ptr);                         // free memory
+void* krealloc(void* ptr, size_t new_size);     // resize block
+
+uint32_t heap_used();   // used bytes
+uint32_t heap_total();  // total heap size

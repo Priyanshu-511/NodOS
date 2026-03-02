@@ -22,7 +22,6 @@ static const char KEY_BS    = 0x08;
 static const char KEY_DEL   = 0x7F;
 static const char KEY_ENTER = '\n';
 
-
 //  Editor state
 
 enum ViMode { MODE_NORMAL, MODE_INSERT, MODE_COMMAND };
@@ -330,7 +329,9 @@ static void vi_load_file() {
             vi.lines[row][col] = '\0';
             vi.line_len[row] = col;
             row++; col = 0;
-            vi.lines[row][0] = '\0'; vi.line_len[row] = 0;
+            if (row < VI_MAX_LINES) {           // guard: don't write past end of array
+                vi.lines[row][0] = '\0'; vi.line_len[row] = 0;
+            }
         } else if (col < VI_LINE_LEN - 1) {
             vi.lines[row][col++] = c;
         }
@@ -477,8 +478,8 @@ static bool vi_handle_normal(char c) {
     }
 
     // 'o' / 'O' — open line below / above
-    if (c == 'o') { vi_open_line_below(); vi_redraw(); return false; }
-    if (c == 'O') { vi_open_line_above(); vi_redraw(); return false; }
+    if (c == 'o') { vi_open_line_below(); vi_clamp(); vi_redraw(); return false; }
+    if (c == 'O') { vi_open_line_above(); vi_clamp(); vi_redraw(); return false; }
 
     // 'x' — delete char under cursor
     if (c == 'x') { vi_delete_char(); vi_redraw_line(); return false; }
@@ -611,6 +612,15 @@ int vi_open(const char* filename) {
             case MODE_COMMAND: quit = vi_handle_command(c); break;
         }
         if (quit) break;
+    }
+
+    if (vi.mode == MODE_COMMAND) {
+            // Move cursor to the status bar (row 24), right after the ':' and current command
+            vga.set_cursor(24, vi.cmd_len + 1);
+        }
+    else {
+            // Move cursor to the text area
+            vga.set_cursor(vi.cy - vi.scroll_row, vi.cx);
     }
 
     // Restore shell appearance

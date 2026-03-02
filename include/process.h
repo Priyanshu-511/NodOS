@@ -29,6 +29,8 @@ void     process_yield();
 Process* process_get(int pid);
 void     process_list(Process** out, int* count);
 
+int      process_record_dummy(const char* name);
+
 // Called from timer IRQ — returns new ESP (may switch tasks)
 uint32_t scheduler_tick(uint32_t current_esp);
 

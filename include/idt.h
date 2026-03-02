@@ -13,6 +13,7 @@ struct Registers {
 typedef void (*ISRHandler)(Registers*);
 typedef void (*IRQHandler)(Registers*);
 
+// IDT descriptor entry
 struct IDTEntry {
     uint16_t base_lo;
     uint16_t sel;
@@ -26,7 +27,7 @@ struct IDTPtr {
     uint32_t base;
 } __attribute__((packed));
 
-void idt_init();
-void irq_install_handler(int irq, IRQHandler h);
-void irq_uninstall_handler(int irq);
-void isr_install_handler(int isr, ISRHandler h);
+void idt_init();                                   // setup + load IDT
+void irq_install_handler(int irq, IRQHandler h);   // set IRQ handler
+void irq_uninstall_handler(int irq);               // remove IRQ handler
+void isr_install_handler(int isr, ISRHandler h);   // set ISR handler

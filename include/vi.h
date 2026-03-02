@@ -1,6 +1,6 @@
 #pragma once
 
-// vi — modal text editor for NodOS.
+// modal text editor for NodOS.
 //
 // Modes
 //   NORMAL : hjkl / arrow movement, dd delete line, o open line,

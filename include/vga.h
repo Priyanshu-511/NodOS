@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+// VGA text-mode driver (80x25, memory at 0xB8000)
+
 enum VGAColor : uint8_t {
     BLACK = 0, BLUE, GREEN, CYAN, RED, MAGENTA,
     BROWN, LIGHT_GREY, DARK_GREY, LIGHT_BLUE,
@@ -76,7 +78,37 @@ public:
             buffer[r * WIDTH + c] = makeEntry(ch, makeColor(fg, bg));
     }
     // Move the VGA logical cursor (used after full-screen redraws)
-    void set_cursor(size_t r, size_t c) { row = r; col = c; }
+    void set_cursor(size_t r, size_t c) { 
+        row = r; 
+        col = c; 
+
+        uint16_t pos = r * WIDTH + c;
+
+        // Send the Low Byte of the position to VGA port 0x3D4/0x3D5
+        asm volatile("outb %0, %1" : : "a"((uint8_t)0x0F), "Nd"((uint16_t)0x3D4));
+        asm volatile("outb %0, %1" : : "a"((uint8_t)(pos & 0xFF)), "Nd"((uint16_t)0x3D5));
+
+        // Send the High Byte of the position
+        asm volatile("outb %0, %1" : : "a"((uint8_t)0x0E), "Nd"((uint16_t)0x3D4));
+        asm volatile("outb %0, %1" : : "a"((uint8_t)((pos >> 8) & 0xFF)), "Nd"((uint16_t)0x3D5));
+    }
+
+    void disable_cursor() {
+        // Select Cursor Start Register (0x0A)
+        asm volatile("outb %0, %1" : : "a"((uint8_t)0x0A), "Nd"((uint16_t)0x3D4));
+        // Write 0x20 (Bit 5 set to 1) to disable the cursor
+        asm volatile("outb %0, %1" : : "a"((uint8_t)0x20), "Nd"((uint16_t)0x3D5));
+    }
+
+    void enable_cursor(uint8_t cursor_start = 14, uint8_t cursor_end = 15) {
+        // Set Cursor Start scanline
+        asm volatile("outb %0, %1" : : "a"((uint8_t)0x0A), "Nd"((uint16_t)0x3D4));
+        asm volatile("outb %0, %1" : : "a"((uint8_t)(cursor_start & 0x1F)), "Nd"((uint16_t)0x3D5));
+
+        // Set Cursor End scanline
+        asm volatile("outb %0, %1" : : "a"((uint8_t)0x0B), "Nd"((uint16_t)0x3D4));
+        asm volatile("outb %0, %1" : : "a"((uint8_t)(cursor_end & 0x1F)), "Nd"((uint16_t)0x3D5));
+    }
 
 private:
     volatile uint16_t* buffer;

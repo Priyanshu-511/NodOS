@@ -67,6 +67,18 @@ void* k_memcpy(void* dst, const void* src, size_t n) {
     return dst;
 }
 
+void*    k_memmove(void* dst, const void* src, size_t n){
+    unsigned char* d = (unsigned char*)dst;
+    const unsigned char* s = (const unsigned char*)src;
+    if (d < s) {
+        while (n--) *d++ = *s++;
+    } else {
+        d += n; s += n;
+        while (n--) *--d = *--s;
+    }
+    return dst;
+}
+
 int k_memcmp(const void* a, const void* b, size_t n) {
     const unsigned char* pa = (const unsigned char*)a;
     const unsigned char* pb = (const unsigned char*)b;

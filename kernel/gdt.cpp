@@ -5,6 +5,7 @@ static GDTPtr   gdt_ptr;
 
 extern "C" void gdt_flush(uint32_t);
 
+// Set a single GDT descriptor
 static void set_gate(int i, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran) {
     gdt[i].base_low  = base & 0xFFFF;
     gdt[i].base_mid  = (base >> 16) & 0xFF;
@@ -15,6 +16,7 @@ static void set_gate(int i, uint32_t base, uint32_t limit, uint8_t access, uint8
 }
 
 void gdt_init() {
+    // Setup GDT pointer
     gdt_ptr.limit = sizeof(GDTEntry) * 5 - 1;
     gdt_ptr.base  = (uint32_t)&gdt;
 

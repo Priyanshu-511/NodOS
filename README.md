@@ -138,7 +138,7 @@ nodos/
 │   ├── vi.h                  # Terminal vi editor
 │   └── wm.h                  # Window manager
 │
-├── src/                      # Implementation files
+├── kernel/                      # Implementation files
 │   ├── ata.cpp
 │   ├── desktop.cpp
 │   ├── fb.cpp
@@ -793,7 +793,7 @@ void gui_myapp_mouse(int wid, int cx, int cy, bool left, bool right, void* ud);
 void gui_myapp_close(int wid, void* ud);
 ```
 
-**Step 2** — Create `src/gui_myapp.cpp`:
+**Step 2** — Create `kernel/gui_myapp.cpp`:
 ```cpp
 #include "../include/gui_myapp.h"
 #include "../include/wm.h"
